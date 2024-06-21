@@ -14,25 +14,37 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DegenToken is ERC20, Ownable {
-    
-    uint256 public constant REDEMPTION_RATE = 100;
+
+    uint256 public constant SWORD_REDEMPTION_RATE = 100;
+    uint256 public constant SHIELD_REDEMPTION_RATE = 150;
 
     mapping(address => uint256) public swordsOwned;
+    mapping(address => uint256) public shieldsOwned;
 
     constructor() ERC20("Degen", "DGN") Ownable(msg.sender) {
         _mint(msg.sender, 10 * (10 ** uint256(decimals())));
     }
 
     function redeemSword(uint256 quantity) public {
-        uint256 cost = REDEMPTION_RATE * quantity;
+        uint256 cost = SWORD_REDEMPTION_RATE * quantity;
         require(balanceOf(msg.sender) >= cost, "Not enough tokens to redeem for a sword");
-
         swordsOwned[msg.sender] += quantity;
+        _burn(msg.sender, cost);
+    }
+
+    function redeemShield(uint256 quantity) public {
+        uint256 cost = SHIELD_REDEMPTION_RATE * quantity;
+        require(balanceOf(msg.sender) >= cost, "Not enough tokens to redeem for a shield");
+        shieldsOwned[msg.sender] += quantity;
         _burn(msg.sender, cost);
     }
 
     function checkSwordsOwned(address user) public view returns (uint256) {
         return swordsOwned[user];
+    }
+
+    function checkShieldsOwned(address user) public view returns (uint256) {
+        return shieldsOwned[user];
     }
 
     function mintTokens(address to, uint256 amount) public onlyOwner {
@@ -54,3 +66,4 @@ contract DegenToken is ERC20, Ownable {
         _transfer(msg.sender, to, amount);
     }
 }
+
